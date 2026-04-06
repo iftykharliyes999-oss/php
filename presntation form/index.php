@@ -4,7 +4,7 @@ include "classes.php";
 // SAVE
 if (isset($_POST["submit"])) {
     $s = new Student($_POST["name"], $_POST["id"], $_POST["address"]);
-    file_put_contents("data.txt", $s->format(), FILE_APPEND);
+   $s->format();
 }
 
 ?>
@@ -76,20 +76,9 @@ if (isset($_POST["submit"])) {
     <th>Address</th>
 </tr>
 
-<?php
-if (file_exists("data.txt")) {
-    $data = file("data.txt");
+<?php 
+ $s->display();
 
-    foreach ($data as $i => $line) {
-        $row = explode(",", $line);
-
-        echo "<tr>
-                <td>$row[0]</td>
-                <td>$row[1]</td>
-                <td>$row[2]</td>
-              </tr>";
-    }
-}
 ?>
 
 </table>
