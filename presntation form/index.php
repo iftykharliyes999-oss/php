@@ -1,6 +1,6 @@
 <?php
 include "classes.php";
-
+$s = $s ?? "default value";
 // SAVE
 if (isset($_POST["submit"])) {
     $s = new Student($_POST["name"], $_POST["id"], $_POST["address"]);
@@ -77,7 +77,7 @@ if (isset($_POST["submit"])) {
 </tr>
 
 <?php 
- $s->display();
+$s->display();
 
 ?>
 
