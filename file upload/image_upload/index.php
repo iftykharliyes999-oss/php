@@ -26,9 +26,9 @@ if(isset($_POST['Upload'])){
 
     // Validation
     if($kb > $maxSize){
-        echo "❌ File is too large. Max 2 MB allowed.";
+        echo " File is too large. Max 2 MB allowed.";
     } elseif(!in_array($typ, $allowed)){
-        echo "❌ Only jpg, jpeg, png files are allowed.";
+        echo " Only jpg, jpeg, png files are allowed.";
     } else {
         // Rename file to avoid overwrite
         $newName = time() . "_" . $fileName;
@@ -37,7 +37,7 @@ if(isset($_POST['Upload'])){
             echo "✅ File uploaded successfully!<br>";
             echo "<img src='".$destination.$newName."' width='200'>";
         } else {
-            echo "❌ Upload failed!";
+            echo " Upload failed!";
         }
     }
 

@@ -40,7 +40,7 @@ if(isset($_FILES['myfile'])){
             if(move_uploaded_file($tempName, $uploadPath)){
                 echo " Upload Successful! <br><br>";
 
-                // image show
+             
                 echo "<img src='".$uploadPath."' width='300'>";
             } else {
                 echo "Failed to upload!";
