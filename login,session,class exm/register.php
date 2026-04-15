@@ -3,32 +3,36 @@ session_start();
 
 $msg = "";
 
-if(isset($_POST["login"])){ 
-    $us = $_POST["user"];
-    $pa = $_POST["pass"];
+if(isset($_POST["register"])){
+
+    $us = trim($_POST["user"]);
+    $pa = trim($_POST["pass"]);
 
     $filepath = __DIR__ . "/data.txt";
 
-    if(file_exists($filepath)){
-        $file = file($filepath);
-        $found = false;
+    if(!file_exists($filepath)){
+        file_put_contents($filepath, "");
+    }
 
-        foreach($file as $line){
-            list($_username, $_password) = explode(",", trim($line));
+    $file = file($filepath);
+    $exists = false;
 
-            if($_username == $us && $_password == $pa){
-                $_SESSION['user'] = $us;
-                $found = true;
-                header("location: main.php");
-                exit();
-            }
+    foreach($file as $line){
+        list($_username, $_password) = explode(",", trim($line));
+
+        if($_username == $us){
+            $exists = true;
+            break;
         }
+    }
 
-        if(!$found){
-            $msg = "Username or Password incorrect!";
-        }
+    if($exists){
+        $msg = "User already exists!";
     } else {
-        $msg = "data.txt file not found!";
+        $newData = $us . "," . $pa . "\r\n";
+        file_put_contents($filepath, $newData, FILE_APPEND);
+
+        $msg = "Registration successful! Go to login.";
     }
 }
 ?>
@@ -36,7 +40,7 @@ if(isset($_POST["login"])){
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login</title>
+<title>Register</title>
 
 <style>
 body {
@@ -46,7 +50,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #43cea2, #185a9d);
 }
 
 .box {
@@ -68,14 +72,10 @@ input {
     border: 1px solid #ccc;
 }
 
-input:focus {
-    border-color: #667eea;
-}
-
 button {
     width: 100%;
     padding: 10px;
-    background: #667eea;
+    background: #43cea2;
     color: white;
     border: none;
     border-radius: 6px;
@@ -83,12 +83,13 @@ button {
 }
 
 button:hover {
-    background: #5a67d8;
+    background: #2bbbad;
 }
 
-.error {
-    color: red;
+.msg {
     font-size: 14px;
+    margin-bottom: 10px;
+    color: red;
 }
 </style>
 
@@ -96,19 +97,19 @@ button:hover {
 <body>
 
 <div class="box">
-<h2>Login</h2>
+<h2>Register</h2>
 
-<div class="error"><?php echo $msg; ?></div>
+<div class="msg"><?php echo $msg; ?></div>
 
 <form method="post">
 <input type="text" name="user" placeholder="Email" required>
 <input type="password" name="pass" placeholder="Password" required>
 
-<button name="login">Login</button>
+<button name="register">Register</button>
 </form>
 
 <br>
-<a href="register.php">Create Account</a>
+<a href="login.php">Go to Login</a>
 
 </div>
 
