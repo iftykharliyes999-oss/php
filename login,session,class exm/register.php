@@ -8,35 +8,46 @@ if(isset($_POST["register"])){
     $us = trim($_POST["user"]);
     $pa = trim($_POST["pass"]);
 
-    $filepath = __DIR__ . "/data.txt";
-
-    if(!file_exists($filepath)){
-        file_put_contents($filepath, "");
+    if(!filter_var($us, FILTER_VALIDATE_EMAIL)){
+        $msg = "Invalid email format!";
     }
+    elseif(strlen($pa) < 8){
+        $msg = "Password must be at least 8 characters!";
+    }
+    else {
 
-    $file = file($filepath);
-    $exists = false;
+        $file = __DIR__ . "/data.txt";
 
-    foreach($file as $line){
-        list($_username, $_password) = explode(",", trim($line));
-
-        if($_username == $us){
-            $exists = true;
-            break;
+        if(!file_exists($file)){
+            file_put_contents($file, "");
         }
-    }
 
-    if($exists){
-        $msg = "User already exists!";
-    } else {
-        $newData = $us . "," . $pa . "\r\n";
-        file_put_contents($filepath, $newData, FILE_APPEND);
+        $lines = file($file);
+        $exists = false;
 
-        $msg = "Registration successful! Go to login.";
+        foreach($lines as $line){
+            $parts = explode(",", trim($line));
+            if(count($parts) < 2) continue;
+
+            if($parts[0] == $us){
+                $exists = true;
+                break;
+            }
+        }
+
+        if($exists){
+            $msg = "User already exists!";
+        } else {
+
+            $hash = password_hash($pa, PASSWORD_DEFAULT);
+
+            file_put_contents($file, $us . "," . $hash . "\r\n", FILE_APPEND);
+
+            $msg = "Registration successful!";
+        }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>

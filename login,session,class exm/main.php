@@ -6,49 +6,77 @@ if(!isset($_SESSION['user'])){
     exit();
 }
 
+$msg = "";
+
+/* LOGOUT */
 if(isset($_POST['logout'])){
     session_destroy();
     header("location: login.php");
     exit();
 }
 
-$msg = "";
-
+/* UPLOAD */
 if(isset($_POST['Upload'])){
 
     $fileName = $_FILES['myfile']['name'];
-    $tempName = $_FILES['myfile']['tmp_name'];
-    $fileSize = $_FILES['myfile']['size'];
+    $tmp = $_FILES['myfile']['tmp_name'];
+    $size = $_FILES['myfile']['size'];
 
-    $kb = $fileSize / 1024;
-    $typ = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+    $price = $_POST['price'];
 
-    $destination = __DIR__ . "/images/";
+    $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
-    if(!is_dir($destination)){
-        mkdir($destination, 0777, true);
-    }
-
-    $maxSize = 2048;
     $allowed = ["jpg","jpeg","png"];
 
-    if($kb > $maxSize){
-        $msg = "File too large (Max 2MB)";
-    } elseif(!in_array($typ, $allowed)){
-        $msg = "Only JPG, JPEG, PNG allowed";
-    } else {
+    if($size > 2*1024*1024){
+        $msg = "Max 2MB allowed!";
+    }
+    elseif(!in_array($ext,$allowed)){
+        $msg = "Only JPG/PNG allowed!";
+    }
+    else {
 
-        $newName = time() . "_" . $fileName;
+        $newName = time()."_".$fileName;
 
-        if(move_uploaded_file($tempName, $destination.$newName)){
+        $path = __DIR__ . "/images/";
+
+        if(!is_dir($path)){
+            mkdir($path,0777,true);
+        }
+
+        if(move_uploaded_file($tmp,$path.$newName)){
+
+            file_put_contents(
+                __DIR__ . "/products.txt",
+                $newName . "," . $price . "\r\n",
+                FILE_APPEND
+            );
+
             $msg = "Upload successful!";
-            $imgPath = "images/" . $newName;
-        } else {
-            $msg = "Upload failed!";
         }
     }
 }
+
+/* LOAD PRODUCTS */
+$products = [];
+
+$file = __DIR__ . "/products.txt";
+
+if(file_exists($file)){
+    $lines = file($file);
+
+    foreach($lines as $line){
+        $parts = explode(",", trim($line));
+        if(count($parts) < 2) continue;
+
+        $products[] = [
+            "img"=>$parts[0],
+            "price"=>$parts[1]
+        ];
+    }
+}
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -56,77 +84,142 @@ if(isset($_POST['Upload'])){
 <title>Dashboard</title>
 
 <style>
-body {
-    font-family: Arial;
-    background: #f4f6f9;
-    text-align: center;
+body{
+    margin:0;
+    font-family:Arial;
+    background:#f4f6f9;
 }
 
-.container {
-    margin-top: 80px;
+/* NAVBAR */
+.navbar{
+    display:flex;
+    justify-content:space-between;
+    padding:15px 30px;
+    background:linear-gradient(90deg,#667eea,#764ba2);
+    color:white;
 }
 
-.box {
-    background: white;
-    padding: 25px;
-    width: 350px;
-    margin: auto;
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+.logo{
+    font-size:22px;
+    font-weight:bold;
+    transition:0.3s;
+}
+.logo:hover{
+    color:#ffd700;
+    transform:scale(1.1);
 }
 
-button {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+/* BOX */
+.container{
+    text-align:center;
+    margin-top:40px;
 }
 
-.upload-btn {
-    background: #28a745;
-    color: white;
+.box{
+    background:white;
+    width:350px;
+    margin:auto;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
-.logout-btn {
-    background: red;
-    color: white;
-    margin-top: 15px;
+input,button{
+    margin:5px;
+    padding:10px;
+    width:90%;
 }
 
-.msg {
-    margin: 10px 0;
+.upload-btn{
+    background:green;
+    color:white;
+    border:none;
 }
 
-img {
-    margin-top: 10px;
-    border-radius: 8px;
+.logout-btn{
+    background:red;
+    color:white;
+    border:none;
+}
+
+/* TABLE */
+.table-container{
+    width:85%;
+    margin:40px auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+th{
+    background:#667eea;
+    color:white;
+    padding:10px;
+}
+
+td{
+    text-align:center;
+    padding:10px;
+}
+
+img{
+    width:80px;
+    border-radius:6px;
 }
 </style>
 
 </head>
 <body>
 
+<!-- NAVBAR -->
+<div class="navbar">
+    <div class="logo">IFTYKHAR</div>
+</div>
+
+<!-- UPLOAD -->
 <div class="container">
 <div class="box">
 
-<h2>Welcome, <?php echo $_SESSION['user']; ?></h2>
-
-<div class="msg"><?php echo $msg; ?></div>
+<h3>Welcome <?php echo $_SESSION['user']; ?></h3>
 
 <form method="post" enctype="multipart/form-data">
-<input type="file" name="myfile" required><br><br>
-<button class="upload-btn" name="Upload">Upload Image</button>
+<input type="file" name="myfile" required>
+<input type="number" name="price" placeholder="Enter Price" required>
+<button class="upload-btn" name="Upload">Upload</button>
 </form>
-
-<?php if(isset($imgPath)){ ?>
-<img src="<?php echo $imgPath; ?>" width="200">
-<?php } ?>
 
 <form method="post">
 <button class="logout-btn" name="logout">Logout</button>
 </form>
 
+<p><?php echo $msg; ?></p>
+
 </div>
+</div>
+
+<!-- TABLE -->
+<div class="table-container">
+<table>
+<tr>
+<th>NAME</th>
+<th>IMAGE</th>
+<th>PRICE</th>
+<th>ADD TO CART</th>
+</tr>
+
+<?php foreach($products as $p){ ?>
+<tr>
+<td><?php echo $p['img']; ?></td>
+<td><img src="images/<?php echo $p['img']; ?>"></td>
+<td>$<?php echo $p['price']; ?></td>
+<td><button>Add to Cart</button></td>
+</tr>
+<?php } ?>
+
+</table>
 </div>
 
 </body>

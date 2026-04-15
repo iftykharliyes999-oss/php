@@ -3,20 +3,23 @@ session_start();
 
 $msg = "";
 
-if(isset($_POST["login"])){ 
-    $us = $_POST["user"];
-    $pa = $_POST["pass"];
+if(isset($_POST["login"])){
 
-    $filepath = __DIR__ . "/data.txt";
+    $us = trim($_POST["user"]);
+    $pa = trim($_POST["pass"]);
 
-    if(file_exists($filepath)){
-        $file = file($filepath);
+    $file = __DIR__ . "/data.txt";
+
+    if(file_exists($file)){
+        $lines = file($file);
         $found = false;
 
-        foreach($file as $line){
-            list($_username, $_password) = explode(",", trim($line));
+        foreach($lines as $line){
 
-            if($_username == $us && $_password == $pa){
+            $parts = explode(",", trim($line));
+            if(count($parts) < 2) continue;
+
+            if($parts[0] == $us && password_verify($pa, $parts[1])){
                 $_SESSION['user'] = $us;
                 $found = true;
                 header("location: main.php");
@@ -25,14 +28,13 @@ if(isset($_POST["login"])){
         }
 
         if(!$found){
-            $msg = "Username or Password incorrect!";
+            $msg = "Invalid email or password!";
         }
     } else {
-        $msg = "data.txt file not found!";
+        $msg = "data.txt not found!";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
