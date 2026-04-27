@@ -3,17 +3,26 @@ session_start();
 
 $msg = "";
 
+/* 👉 success message after redirect */
+if(isset($_GET['success'])){
+    $msg = "Registration successful!";
+}
+
 if(isset($_POST["register"])){
 
     $us = trim($_POST["user"]);
     $pa = trim($_POST["pass"]);
 
-    if(!filter_var($us, FILTER_VALIDATE_EMAIL)){
+    // EMAIL regex
+    if(!preg_match("/^[\w\.-]+@[\w\.-]+\.\w+$/", $us)){
         $msg = "Invalid email format!";
     }
-    elseif(strlen($pa) < 8){
+
+    // PASSWORD regex (min 8 chars)
+    elseif(!preg_match("/^.{8,}$/", $pa)){
         $msg = "Password must be at least 8 characters!";
     }
+
     else {
 
         $file = __DIR__ . "/data.txt";
@@ -41,9 +50,11 @@ if(isset($_POST["register"])){
 
             $hash = password_hash($pa, PASSWORD_DEFAULT);
 
-            file_put_contents($file, $us . "," . $hash . "\r\n", FILE_APPEND);
+            file_put_contents($file, $us . "," . $hash . PHP_EOL, FILE_APPEND);
 
-            $msg = "Registration successful!";
+            /* 👉 redirect (IMPORTANT PART) */
+            header("Location: ".$_SERVER['PHP_SELF']."?success=1");
+            exit();
         }
     }
 }
@@ -110,13 +121,15 @@ button:hover {
 <div class="box">
 <h2>Register</h2>
 
-<div class="msg"><?php echo $msg; ?></div>
+<div class="msg"><?= $msg ?></div>
 
 <form method="post">
+
 <input type="text" name="user" placeholder="Email" required>
 <input type="password" name="pass" placeholder="Password" required>
 
 <button name="register">Register</button>
+
 </form>
 
 <br>
