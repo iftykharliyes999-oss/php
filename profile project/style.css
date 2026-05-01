@@ -28,7 +28,7 @@ body {
   background-size: 400%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: rgbGlow 6s linear infinite;
+  animation: rgbGlow 15s linear infinite;
   letter-spacing: 2px;
 }
 
@@ -116,7 +116,7 @@ body {
 .home h1 span {
   background: linear-gradient(90deg, cyan, blue, magenta);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  /* -webkit-text-fill-color: transparent; */
   animation: glow 4s linear infinite;
 }
 
@@ -213,7 +213,7 @@ body {
 
 /* HOVER TEXT */
 
-/* 🔥 CURSOR HOVER TEXT EFFECT */
+/* CURSOR HOVER TEXT EFFECT */
 .hover-text {
   position: relative;
   cursor: pointer;
@@ -223,7 +223,7 @@ body {
 /* hover state */
 .hover-text:hover {
   color: #38bdf8;
-  text-shadow: 0 0 8px #38bdf8, 0 0 20px #0ea5e9;
+  text-shadow: 0 0 5px #38bdf8, 0 0 20px #0ea5e9;
 }
 
 /* underline animation */
